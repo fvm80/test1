@@ -43,6 +43,7 @@ const App = (() => {
   let config     = null;   // parsed data.json
   let questions  = [];     // array of question objects from GAS
   let currentUser = null;  // logged-in username
+  let examTitle   = 'Online Exam'; // topic title from sheet H1
 
   /* ── Utility: SHA-256 via Web Crypto API ───────── */
   /**
@@ -166,18 +167,25 @@ const App = (() => {
   ───────────────────────────────────────────────────────── */
   async function loadQuestions() {
     const endpoint = b64decode(config.endpoint_questions);
-    const url      = endpoint;
 
     try {
-      const res  = await fetch(url);
+      const res  = await fetch(endpoint);
       const data = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
+      // GAS returns { title: "...", questions: [...] }
+      // Support both formats: plain array (old) or object with title (new)
+      if (Array.isArray(data)) {
+        questions = shuffle(data);
+        examTitle = 'Online Exam';
+      } else {
+        examTitle = data.title || 'Online Exam';
+        questions = shuffle(data.questions || []);
+      }
+
+      if (questions.length === 0) {
         throw new Error('No questions returned. Check your Google Sheet.');
       }
 
-      // Randomise question order
-      questions = shuffle(data);
       renderExam();
     } catch (err) {
       alert('Failed to load questions:\n' + err.message);
@@ -193,25 +201,32 @@ const App = (() => {
   ───────────────────────────────────────────────────────── */
   function renderExam() {
     document.getElementById('exam-username').textContent = currentUser;
+    document.getElementById('exam-title').textContent    = examTitle;
     document.getElementById('question-count').textContent =
       `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
 
     const container = document.getElementById('questions-container');
     container.innerHTML = '';
 
+    // ── Block text copying on exam body ──────────────
+    const examBody = document.querySelector('.exam-body');
+    examBody.addEventListener('copy',        e => e.preventDefault());
+    examBody.addEventListener('cut',         e => e.preventDefault());
+    examBody.addEventListener('contextmenu', e => e.preventDefault());
+
     questions.forEach((q, idx) => {
+      // Only 3 options: A, B, C
       const options = [
         { key: 'A', text: q.option_a },
         { key: 'B', text: q.option_b },
         { key: 'C', text: q.option_c },
-        { key: 'D', text: q.option_d },
       ];
 
       const card = document.createElement('div');
       card.className = 'q-card';
       card.style.animationDelay = `${idx * 0.05}s`;
-      card.dataset.qid = q.question_id;
-      card.dataset.correct = q.correct_answer; // A/B/C/D
+      card.dataset.qid     = q.question_id;
+      card.dataset.correct = q.correct_answer; // A/B/C
 
       card.innerHTML = `
         <div class="q-num">Question ${idx + 1}</div>
@@ -319,23 +334,35 @@ const App = (() => {
      Displays the score ring, stats, and a success message.
   ───────────────────────────────────────────────────────── */
   function showResult(score, correct, total) {
+    const PASS_THRESHOLD = 80; // percent
+    const passed = score >= PASS_THRESHOLD;
+
     document.getElementById('result-username').textContent = currentUser;
     document.getElementById('result-score-num').textContent = score + '%';
 
-    // CSS conic-gradient percentage drives the visual ring
-    document.getElementById('result-ring')
-      .style.setProperty('--score-pct', score + '%');
+    // Color ring green (pass) or red (fail)
+    const ring = document.getElementById('result-ring');
+    ring.classList.remove('pass', 'fail');
+    ring.classList.add(passed ? 'pass' : 'fail');
+    ring.style.setProperty('--score-pct', score + '%');
 
-    let grade = '';
-    if (score >= 90) grade = '🏆 Excellent!';
-    else if (score >= 75) grade = '👍 Good job!';
-    else if (score >= 60) grade = '📝 Passing';
-    else grade = '📚 Keep studying';
+    // Title
+    document.getElementById('result-title').textContent =
+      passed ? 'Exam Passed! 🎉' : 'Exam Not Passed';
 
+    // Verdict banner
+    const verdictEl = document.getElementById('result-verdict');
+    verdictEl.innerHTML = passed
+      ? `<div class="verdict pass">✅ Congratulations, you passed the test!</div>`
+      : `<div class="verdict fail">❌ Unfortunately, you did not pass the test, please try again!</div>`;
+
+    // Subtitle
     document.getElementById('result-sub').textContent =
-      `${grade} — Your answers have been recorded.`;
+      `Passing score: ${PASS_THRESHOLD}% — Your answers have been recorded.`;
 
+    // Stats
     document.getElementById('result-stats').innerHTML = `
+      <div class="stat-pill"><strong>${score}%</strong>Your Score</div>
       <div class="stat-pill"><strong>${correct}</strong>Correct</div>
       <div class="stat-pill"><strong>${total - correct}</strong>Incorrect</div>
       <div class="stat-pill"><strong>${total}</strong>Total Qs</div>
