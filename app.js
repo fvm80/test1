@@ -166,7 +166,7 @@ const App = (() => {
   ───────────────────────────────────────────────────────── */
   async function loadQuestions() {
     const endpoint = b64decode(config.endpoint_questions);
-    const url      = endpoint + '?action=getQuestions';
+    const url      = endpoint;
 
     try {
       const res  = await fetch(url);
