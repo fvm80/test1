@@ -1,0 +1,28 @@
+{
+  "_comment": "ExamPortal configuration — see README for setup instructions",
+
+  "_comment_endpoint_questions": [
+    "1. Deploy your Google Apps Script as a Web App",
+    "2. Copy the /exec URL",
+    "3. Encode it: open browser console, run: btoa('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec')",
+    "4. Paste the base64 result below"
+  ],
+  "endpoint_questions": "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5bm1PQ3ZEOU9JaVNjalhwOTdQMU5taE9JNFRMMXJvWERtYWZidmI2UFhwN3J4bGNXbE1xSFhNdjdBWWx1eDA3eDUvZXhlYw==",
+
+  "_comment_endpoint_results": "Same process as above, but for your Results GAS endpoint (can be the same script)",
+  "endpoint_results": "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5bm1PQ3ZEOU9JaVNjalhwOTdQMU5taE9JNFRMMXJvWERtYWZidmI2UFhwN3J4bGNXbE1xSFhNdjdBWWx1eDA3eDUvZXhlYw==",
+
+  "_comment_users": [
+    "Keys are usernames, values are SHA-256 hashes of passwords.",
+    "To generate a hash, run in browser console:",
+    "  async function hash(p){const b=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('');}",
+    "  hash('mypassword').then(console.log)",
+    "",
+    "Below: student1/password123, student2/securepass, demo/demo"
+  ],
+  "users": {
+    "fvm": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "flg": "8d23cf6c86e834a7aa6eded54c26ce2bb2e74903538c61bdd5d2197997ab2f72",
+    "demo":"8d23cf6c86e834a7aa6eded54c26ce2bb2e74903538c61bdd5d2197997ab2f72"
+  }
+}
