@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ExamPortal</title>
+  <title>TerraAvia_ExamPortal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
@@ -435,6 +435,35 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── No copy on exam page ───────────────────── */
+    #exam-view .exam-body {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── Result ring: pass = green, fail = red ── */
+    .result-ring.pass {
+      background: conic-gradient(#22c55e 0% var(--score-pct, 0%), var(--border) var(--score-pct, 0%) 100%);
+    }
+    .result-ring.fail {
+      background: conic-gradient(var(--accent2) 0% var(--score-pct, 0%), var(--border) var(--score-pct, 0%) 100%);
+    }
+
+    /* ── Verdict banner ─────────────────────────── */
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .7rem 1.4rem;
+      border-radius: 99px;
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .verdict.pass { background: #dcfce7; color: #15803d; }
+    .verdict.fail { background: #fff0f0; color: #be123c; }
+
     /* responsive */
     @media (max-width: 560px) {
       .login-card { padding: 2rem 1.5rem; }
@@ -451,8 +480,8 @@
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="login-card">
-      <p class="login-eyebrow">Online Assessment</p>
-      <h1 class="login-title">ExamPortal</h1>
+      <p class="login-eyebrow">TerraAvia Online Assessment</p>
+      <h1 class="login-title">Exam Portal</h1>
       <p class="login-subtitle">Sign in with your student credentials to begin.</p>
 
       <div class="field">
@@ -472,13 +501,13 @@
   <!-- ② EXAM ──────────────────────────────────── -->
   <div id="exam-view" class="view">
     <nav class="topbar">
-      <span class="brand">ExamPortal</span>
+      <span class="brand">Exam Portal</span>
       <div class="user-chip">👤 <span id="exam-username"></span></div>
     </nav>
 
     <div class="exam-body">
       <div class="exam-meta">
-        <h1>Online Exam</h1>
+        <h1 id="exam-title">Online Exam</h1>
         <div class="progress-pill" id="question-count">Loading…</div>
       </div>
       <div id="questions-container">
@@ -495,14 +524,15 @@
   <!-- ③ RESULT ─────────────────────────────────── -->
   <div id="result-view" class="view">
     <nav class="topbar">
-      <span class="brand">ExamPortal</span>
+      <span class="brand">Exam Portal</span>
       <div class="user-chip">👤 <span id="result-username"></span></div>
     </nav>
     <div class="result-body">
       <div class="result-ring" id="result-ring">
         <span class="result-score-num" id="result-score-num">–</span>
       </div>
-      <h2 class="result-title">Exam Submitted!</h2>
+      <h2 class="result-title" id="result-title">Exam Submitted!</h2>
+      <div id="result-verdict"></div>
       <p class="result-sub" id="result-sub">Your answers have been recorded.</p>
       <div class="result-stats" id="result-stats"></div>
       <button class="btn-logout" onclick="App.logout()">← Back to Login</button>
